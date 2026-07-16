@@ -8,7 +8,6 @@ class Program
 {
     const int WH_KEYBOARD_LL = 13;
     const int WM_KEYDOWN = 0x0100;
-    const int WM_KEYUP = 0x0101;
     const uint KEYEVENTF_KEYUP = 0x0002;
     const uint SCANCODE = 0x0008;
 
@@ -17,9 +16,7 @@ class Program
     const ushort SC_2 = 0x03;
     const ushort SC_3 = 0X04;
     const ushort SC_R = 0x13;
-    const ushort SC_F = 0x21;
-    const ushort SC_G = 0x22;
-    const ushort SC_V = 0x2F;
+
 
     static IntPtr hook;
     static HookProc callback = HookCallback;
