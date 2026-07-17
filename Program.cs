@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Threading;
+using System.Collections.Generic;
 
 class Program
 {
@@ -24,14 +25,14 @@ class Program
     private const int VK_H = 0x48;
     
     // Mapping VK -> SC
-    private Dictionary<int, ushort> mapping = new Dictionary<int, ushort>()
+    private static Dictionary<int, ushort> mapping = new Dictionary<int, ushort>()
     {
         { VK_F, SC_1 }, { VK_B, SC_2 }, { VK_H, SC_3 }
     };
     
     static IntPtr hook;
     static HookProc callback = HookCallback;
-    static enabled = true;
+    static bool enabled = true;
 
     [STAThread]
     static void Main()
@@ -49,7 +50,7 @@ class Program
     {
         if (code >= 0)
         {
-            const int vk = Marshal.ReadInt32(lParam);
+            int vk = Marshal.ReadInt32(lParam);
             if (vk == VK_HOME && wParam == WM_KEYDOWN)
             {
                 enabled = !enabled;
