@@ -6,20 +6,32 @@ using System.Threading;
 
 class Program
 {
-    const int WH_KEYBOARD_LL = 13;
-    const int WM_KEYDOWN = 0x0100;
-    const uint KEYEVENTF_KEYUP = 0x0002;
-    const uint SCANCODE = 0x0008;
+    private const int WH_KEYBOARD_LL = 13;
+    private const int WM_KEYDOWN = 0x0100;
+    private const uint KEYEVENTF_KEYUP = 0x0002;
+    private const uint SCANCODE = 0x0008;
 
     // Scan codes
-    const ushort SC_1 = 0x02;
-    const ushort SC_2 = 0x03;
-    const ushort SC_3 = 0X04;
-    const ushort SC_R = 0x13;
+    private const ushort SC_1 = 0x02;
+    private const ushort SC_2 = 0x03;
+    private const ushort SC_3 = 0X04;
+    private const ushort SC_R = 0x13;
 
-
+    // Virtual Key Codes
+    private const int VK_HOME = 0x24;
+    private const int VK_F = 0x46;
+    private const int VK_B = 0x42;
+    private const int VK_H = 0x48;
+    
+    // Mapping VK -> SC
+    private Dictionary<int, ushort> mapping = new Dictionary<int, ushort>()
+    {
+        { VK_F, SC_1 }, { VK_B, SC_2 }, { VK_H, SC_3 }
+    };
+    
     static IntPtr hook;
     static HookProc callback = HookCallback;
+    static enabled = true;
 
     [STAThread]
     static void Main()
@@ -35,22 +47,20 @@ class Program
 
     static IntPtr HookCallback(int code, IntPtr wParam, IntPtr lParam)
     {
-        if (code >= 0 && Marshal.ReadInt32(lParam) == 0x46) // F
+        if (code >= 0)
         {
-            if (wParam == WM_KEYDOWN) SendGhostCombo(SC_1);
-            return (IntPtr)1; // swallow F
-        }
+            const int vk = Marshal.ReadInt32(lParam);
+            if (vk == VK_HOME && wParam == WM_KEYDOWN)
+            {
+                enabled = !enabled;
+                return (IntPtr)1; // swallow home
+            }
 
-        if (code >= 0 && Marshal.ReadInt32(lParam) == 0x56) // V
-        {
-            if (wParam == WM_KEYDOWN) SendGhostCombo(SC_2);
-            return (IntPtr)1; // swallow V
-        }
-
-        if (code >= 0 && Marshal.ReadInt32(lParam) == 0x42) // B
-        {
-            if (wParam == WM_KEYDOWN) SendGhostCombo(SC_3);
-            return (IntPtr)1; // swallow B
+            if (mapping.TryGetValue(vk, out var scode) && wParam == WM_KEYDOWN && enabled)
+            {
+                SendGhostCombo(scode);
+                return (IntPtr)1;  // swallow key
+            }
         }
 
         return CallNextHookEx(hook, code, wParam, lParam);
