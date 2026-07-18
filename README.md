@@ -1,6 +1,10 @@
 # GhostRemap
 Remap Ghost weapon keys for Ghost of Tsushima Legends to single press keys instead of hold R and number simultaneously.
 
+>> **IMPORTANT:** This is NOT A CHEAT or TRAINER!  
+> This is simply quality of life patch to implement a feature that
+> existed in the main game, but was not implemented in Legends.
+
 ## Configuration
 Clone the repository and edit the following section to the keys you want to use for ghost weapon 1, 2 and 3.
 
