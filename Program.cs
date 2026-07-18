@@ -19,6 +19,7 @@ class Program
     private const ushort SC_R = 0x13;
 
     // Virtual Key Codes
+    // Data from https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
     private const int VK_HOME = 0x24;
     private const int VK_F = 0x46;
     private const int VK_B = 0x42;
