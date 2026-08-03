@@ -117,7 +117,7 @@ class Program
         [FieldOffset(0)] public KEYBDINPUT ki;
     }
 
-     [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)]
     struct KEYBDINPUT
     {
         public ushort wVk;
