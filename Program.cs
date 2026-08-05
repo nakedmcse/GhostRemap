@@ -20,6 +20,11 @@ class Program
 
     // Virtual Key Codes
     // Data from https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
+    private const int VK_PGUP = 0x21;
+    private const int VK_LEFT = 0x1;
+    private const int VK_RIGHT = 0x2;
+    private const int VK_X1 = 0x5;
+    private const int VK_X2 = 0x6;
     private const int VK_HOME = 0x24;
     private const int VK_F = 0x46;
     private const int VK_B = 0x42;
@@ -34,6 +39,7 @@ class Program
     static IntPtr hook;
     static HookProc callback = HookCallback;
     static bool enabled = true;
+    static bool mmcEnabled = false;
 
     [STAThread]
     static void Main()
@@ -57,11 +63,23 @@ class Program
                 enabled = !enabled;
                 return (IntPtr)1; // swallow home
             }
+            
+            if (vk == VK_PGUP && wParam == WM_KEYDOWN)
+            {
+                mmcEnabled = !mmcEnabled;
+                return (IntPtr)1; // swallow pgup
+            }
 
             if (mapping.TryGetValue(vk, out var scode) && wParam == WM_KEYDOWN && enabled)
             {
                 SendGhostCombo(scode);
                 return (IntPtr)1;  // swallow key
+            }
+
+            if (vk == VK_RIGHT && wParam == WM_KEYDOWN && mmcEnabled)
+            {
+                SendMMC();
+                return (IntPtr)1;  // swallow click
             }
         }
 
@@ -90,6 +108,13 @@ class Program
             Key(SC_R, SCANCODE | KEYEVENTF_KEYUP)
         };
         SendInput((uint)up.Length, up, Marshal.SizeOf<INPUT>());
+    }
+
+    static void SendMMC()
+    {
+        // Implement macro to send hold right click for 0.5s, wait 20ms, click x1, wait 20ms
+        // click right click, wait 20ms, click x1, wait 20ms
+        // click right click, wait 20ms, click x1, wait 20ms
     }
 
      static INPUT Key(ushort key, uint flags) => new()
