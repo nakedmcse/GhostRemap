@@ -9,14 +9,17 @@ class Program
 {
     private const int WH_KEYBOARD_LL = 13;
     private const int WM_KEYDOWN = 0x0100;
+    private const int WM_RIGHTUP = 0x0205;
     private const uint KEYEVENTF_KEYUP = 0x0002;
     private const uint SCANCODE = 0x0008;
+    private const uint MOUSEEVENTF_RIGHTUP = 0x0010;
 
     // Scan codes
     private const ushort SC_1 = 0x02;
     private const ushort SC_2 = 0x03;
     private const ushort SC_3 = 0X04;
     private const ushort SC_R = 0x13;
+    private const ushort SC_LEFTCTRL = 0x1D;
 
     // Virtual Key Codes
     // Data from https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
@@ -39,7 +42,7 @@ class Program
     static IntPtr hook;
     static HookProc callback = HookCallback;
     static bool enabled = true;
-    static bool mmcEnabled = false;
+    static bool acEnabled = false;
 
     [STAThread]
     static void Main()
@@ -66,7 +69,7 @@ class Program
             
             if (vk == VK_PGUP && wParam == WM_KEYDOWN)
             {
-                mmcEnabled = !mmcEnabled;
+                acEnabled = !acEnabled;
                 return (IntPtr)1; // swallow pgup
             }
 
@@ -76,10 +79,10 @@ class Program
                 return (IntPtr)1;  // swallow key
             }
 
-            if (vk == VK_RIGHT && wParam == WM_KEYDOWN && mmcEnabled)
+            if (wParam == WM_RIGHTUP && acEnabled)
             {
-                SendMMC();
-                return (IntPtr)1;  // swallow click
+                SendAC();
+                return (IntPtr)1;  // swallow click up
             }
         }
 
@@ -110,19 +113,36 @@ class Program
         SendInput((uint)up.Length, up, Marshal.SizeOf<INPUT>());
     }
 
-    static void SendMMC()
+    static void SendAC()
     {
-        // Implement macro to send hold right click for 0.5s, wait 20ms, click x1, wait 20ms
-        // click right click, wait 20ms, click x1, wait 20ms
-        // click right click, wait 20ms, click x1, wait 20ms
+        INPUT[] upMouse =
+        {
+            Mouse(MOUSEEVENTF_RIGHTUP)
+        };
+        SendInput((unit)upMouse.Length, upMouse, Marshal.SizeOf<INPUT>());
+        Thread.Sleep(10);
+        INPUT[] upAim =
+        {
+            Key(SC_LEFTCTRL, SCANCODE | KEYEVENTF_KEYUP)
+        };
+        SendInput((uint)upAim.Length, upAim, Marshal.SizeOf<INPUT>());
     }
 
-     static INPUT Key(ushort key, uint flags) => new()
+    static INPUT Key(ushort key, uint flags) => new()
     {
         type = 1,
         U = new InputUnion
         {
             ki = new KEYBDINPUT { wScan = key, dwFlags = flags }
+        }
+    };
+
+    static INPUT Mouse(uint flags) => new()
+    {
+        type = 0,
+        U = new InputUnion
+        {
+            mi = new MOUSEINPUT { dwFlags = flags }
         }
     };
 
