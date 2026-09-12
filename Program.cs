@@ -19,6 +19,8 @@ class Program
     private const ushort SC_2 = 0x03;
     private const ushort SC_3 = 0X04;
     private const ushort SC_R = 0x13;
+    private const ushort SC_N = 0x31;
+    private const ushort SC_M = 0x32;
     private const ushort SC_LEFTCTRL = 0x1D;
 
     // Virtual Key Codes
@@ -32,6 +34,7 @@ class Program
     private const int VK_F = 0x46;
     private const int VK_B = 0x42;
     private const int VK_H = 0x48;
+    private const int VK_Q = 0x51;
     
     // Mapping VK -> SC
     private static Dictionary<int, ushort> mapping = new Dictionary<int, ushort>()
@@ -71,6 +74,12 @@ class Program
             {
                 acEnabled = !acEnabled;
                 return (IntPtr)1; // swallow pgup
+            }
+
+            if (vk == VK_Q && wParam == WM_KEYDOWN && enabled)
+            {
+                SendDodgeHeavy();
+                return (IntPtr)1;  // swallow key
             }
 
             if (mapping.TryGetValue(vk, out var scode) && wParam == WM_KEYDOWN && enabled)
@@ -113,13 +122,37 @@ class Program
         SendInput((uint)up.Length, up, Marshal.SizeOf<INPUT>());
     }
 
+    static void SendDodgeHeavy()
+    {
+        INPUT[] downDodge =
+        {
+            Key(SC_N, SCANCODE)
+        };
+        SendInput((uint)downDodge.Length, downDodge, Marshal.SizeOf<INPUT>());
+        Thread.Sleep(10);
+
+        INPUT[] downHeavy =
+        {
+            Key(SC_M, SCANCODE)
+        };
+        SendInput((uint)downHeavy.Length, downHeavy, Marshal.SizeOf<INPUT>());
+        Thread.Sleep(10);
+
+        INPUT[] up =
+        {
+            Key(SC_N, SCANCODE | KEYEVENTF_KEYUP),
+            Key(SC_M, SCANCODE | KEYEVENTF_KEYUP)
+        };
+        SendInput((uint)up.Length, up, Marshal.SizeOf<INPUT>());
+    }
+
     static void SendAC()
     {
         INPUT[] upMouse =
         {
             Mouse(MOUSEEVENTF_RIGHTUP)
         };
-        SendInput((unit)upMouse.Length, upMouse, Marshal.SizeOf<INPUT>());
+        SendInput((uint)upMouse.Length, upMouse, Marshal.SizeOf<INPUT>());
         Thread.Sleep(10);
         INPUT[] upAim =
         {
